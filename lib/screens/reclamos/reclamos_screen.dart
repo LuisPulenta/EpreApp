@@ -1,9 +1,18 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:camera/camera.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:epreapp/helpers/helpers.dart';
 import 'package:epreapp/models/models.dart';
+import 'package:epreapp/screens/screens.dart';
 import 'package:epreapp/themes/app_theme.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ReclamosScreen extends StatefulWidget {
   const ReclamosScreen({Key? key}) : super(key: key);
@@ -124,12 +133,30 @@ class _ReclamosScreenState extends State<ReclamosScreen>
   bool _negativaDeConexion = false;
   bool _inconvenienteDeTension = false;
   bool _facturaFueraDeTerminoNoRecibidas = false;
+
   //--------------------- Variables del 5° TabBar --------------------
 
   String _reclamo = '';
   String _reclamoError = '';
   bool _reclamoShowError = false;
   TextEditingController _reclamoController = TextEditingController();
+
+  //--------------------- Variables del 6° TabBar --------------------
+
+  bool _photoChanged1 = false;
+  late XFile _image1;
+  bool _photoChanged2 = false;
+  late XFile _image2;
+  bool _photoChanged3 = false;
+  late XFile _image3;
+
+  String base64imagePdf1 = '';
+  String base64imagePdf2 = '';
+  String base64imagePdf3 = '';
+
+  String ruta1 = '';
+  String ruta2 = '';
+  String ruta3 = '';
 
 //--------------------------------------------------------
 //--------------------- initState ------------------------
@@ -148,6 +175,7 @@ class _ReclamosScreenState extends State<ReclamosScreen>
 
   @override
   Widget build(BuildContext context) {
+    double ancho = MediaQuery.of(context).size.width;
     return Container(
       color: AppTheme.secondary,
       child: Column(
@@ -370,7 +398,9 @@ class _ReclamosScreenState extends State<ReclamosScreen>
                                       backgroundColor: AppTheme.primary,
                                     ),
                                     Column(
-                                      children: const [],
+                                      children: [
+                                        _showFotos(ancho),
+                                      ],
                                     )
                                   ],
                                 ),
@@ -1466,6 +1496,647 @@ class _ReclamosScreenState extends State<ReclamosScreen>
 //------------------ 6° TabBar ---------------------------
     _tabBar6Ok = true;
 
+    setState(() {});
+  }
+
+//--------------------------------------------------------------
+//-------------------------- _showFotos ------------------------
+//--------------------------------------------------------------
+
+  Widget _showFotos(double ancho) {
+    double factor = 0.2;
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: const [
+              Text("Puede subir hasta 3 Fotos y 3 archivos PDF",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
+        const Divider(
+          height: 10,
+          color: AppTheme.primary,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: const [
+              Text("Foto1",
+                  style: TextStyle(
+                      color: AppTheme.primary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Expanded(
+              child: Stack(children: <Widget>[
+                Container(
+                  child: !_photoChanged1
+                      ? Center(
+                          child: Image(
+                              image: const AssetImage('assets/noimage.png'),
+                              width: ancho * factor,
+                              height: ancho * factor,
+                              fit: BoxFit.contain),
+                        )
+                      : Center(
+                          child: Image.file(
+                            File(_image1.path),
+                            width: ancho * factor,
+                            height: ancho * factor,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                ),
+                Positioned(
+                    bottom: 0,
+                    left: ancho * 0.8,
+                    child: InkWell(
+                      onTap: () => _takePicture(1),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: Container(
+                          color: AppTheme.primary,
+                          width: 40,
+                          height: 40,
+                          child: const Icon(
+                            Icons.photo_camera,
+                            size: 30,
+                            color: Color(0xFFf6faf8),
+                          ),
+                        ),
+                      ),
+                    )),
+                Positioned(
+                    bottom: 0,
+                    left: ancho * 0.1,
+                    child: InkWell(
+                      onTap: () => _selectPicture(1),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: Container(
+                          color: AppTheme.primary,
+                          width: 40,
+                          height: 40,
+                          child: const Icon(
+                            Icons.image,
+                            size: 30,
+                            color: Color(0xFFf6faf8),
+                          ),
+                        ),
+                      ),
+                    )),
+              ]),
+            ),
+          ],
+        ),
+        const Divider(
+          height: 10,
+          color: AppTheme.primary,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: const [
+              Text("Foto 2",
+                  style: TextStyle(
+                      color: AppTheme.primary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Expanded(
+              child: Stack(children: <Widget>[
+                Container(
+                  child: !_photoChanged2
+                      ? Center(
+                          child: Image(
+                              image: const AssetImage('assets/noimage.png'),
+                              width: ancho * factor,
+                              height: ancho * factor,
+                              fit: BoxFit.contain),
+                        )
+                      : Center(
+                          child: Image.file(
+                            File(_image2.path),
+                            width: ancho * 0.6,
+                            height: ancho * 0.6,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                ),
+                Positioned(
+                    bottom: 0,
+                    left: ancho * 0.8,
+                    child: InkWell(
+                      onTap: () => _takePicture(2),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: Container(
+                          color: AppTheme.primary,
+                          width: 40,
+                          height: 40,
+                          child: const Icon(
+                            Icons.photo_camera,
+                            size: 30,
+                            color: Color(0xFFf6faf8),
+                          ),
+                        ),
+                      ),
+                    )),
+                Positioned(
+                    bottom: 0,
+                    left: ancho * 0.1,
+                    child: InkWell(
+                      onTap: () => _selectPicture(2),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: Container(
+                          color: AppTheme.primary,
+                          width: 40,
+                          height: 40,
+                          child: const Icon(
+                            Icons.image,
+                            size: 30,
+                            color: Color(0xFFf6faf8),
+                          ),
+                        ),
+                      ),
+                    )),
+              ]),
+            ),
+          ],
+        ),
+        const Divider(
+          height: 10,
+          color: AppTheme.primary,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: const [
+              Text("Foto 3",
+                  style: TextStyle(
+                      color: AppTheme.primary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Expanded(
+              child: Stack(children: <Widget>[
+                Container(
+                  child: !_photoChanged3
+                      ? Center(
+                          child: Image(
+                              image: const AssetImage('assets/noimage.png'),
+                              width: ancho * factor,
+                              height: ancho * factor,
+                              fit: BoxFit.contain),
+                        )
+                      : Center(
+                          child: Image.file(
+                            File(_image3.path),
+                            width: ancho * 0.6,
+                            height: ancho * 0.6,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                ),
+                Positioned(
+                    bottom: 0,
+                    left: ancho * 0.8,
+                    child: InkWell(
+                      onTap: () => _takePicture(3),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: Container(
+                          color: AppTheme.primary,
+                          width: 40,
+                          height: 40,
+                          child: const Icon(
+                            Icons.photo_camera,
+                            size: 30,
+                            color: Color(0xFFf6faf8),
+                          ),
+                        ),
+                      ),
+                    )),
+                Positioned(
+                    bottom: 0,
+                    left: ancho * 0.1,
+                    child: InkWell(
+                      onTap: () => _selectPicture(3),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: Container(
+                          color: AppTheme.primary,
+                          width: 40,
+                          height: 40,
+                          child: const Icon(
+                            Icons.image,
+                            size: 30,
+                            color: Color(0xFFf6faf8),
+                          ),
+                        ),
+                      ),
+                    )),
+              ]),
+            ),
+          ],
+        ),
+        const Divider(
+          height: 10,
+          color: AppTheme.primary,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: const [
+              Text("PDF 1",
+                  style: TextStyle(
+                      color: AppTheme.primary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Stack(
+                children: [
+                  Container(
+                    child: base64imagePdf1 != ""
+                        ? Center(
+                            child: SizedBox(
+                              width: 150,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.primary,
+                                  minimumSize: const Size(150, 40),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                ),
+                                onPressed: () async {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => PdfScreen(
+                                        ruta: ruta1,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: const [
+                                    Icon(Icons.picture_as_pdf),
+                                    Text('Ver PDF1'),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
+                        : Container(
+                            height: 40,
+                          ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    left: ancho * 0.1,
+                    child: InkWell(
+                      onTap: () => _loadPdf(1),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: Container(
+                          color: AppTheme.primary,
+                          width: 40,
+                          height: 40,
+                          child: const Icon(
+                            Icons.picture_as_pdf,
+                            size: 30,
+                            color: Color(0xFFf6faf8),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const Divider(
+          height: 10,
+          color: AppTheme.primary,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: const [
+              Text("PDF 2",
+                  style: TextStyle(
+                      color: AppTheme.primary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Stack(
+                children: [
+                  Container(
+                    child: base64imagePdf2 != ""
+                        ? Center(
+                            child: SizedBox(
+                              width: 150,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.primary,
+                                  minimumSize: const Size(150, 40),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                ),
+                                onPressed: () async {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => PdfScreen(
+                                        ruta: ruta2,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: const [
+                                    Icon(Icons.picture_as_pdf),
+                                    Text('Ver PDF2'),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
+                        : Container(
+                            height: 40,
+                          ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    left: ancho * 0.1,
+                    child: InkWell(
+                      onTap: () => _loadPdf(2),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: Container(
+                          color: AppTheme.primary,
+                          width: 40,
+                          height: 40,
+                          child: const Icon(
+                            Icons.picture_as_pdf,
+                            size: 30,
+                            color: Color(0xFFf6faf8),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const Divider(
+          height: 10,
+          color: AppTheme.primary,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: const [
+              Text("PDF 3",
+                  style: TextStyle(
+                      color: AppTheme.primary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Stack(
+                children: [
+                  Container(
+                    child: base64imagePdf3 != ""
+                        ? Center(
+                            child: SizedBox(
+                              width: 150,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.primary,
+                                  minimumSize: const Size(150, 40),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                ),
+                                onPressed: () async {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => PdfScreen(
+                                        ruta: ruta3,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: const [
+                                    Icon(Icons.picture_as_pdf),
+                                    Text('Ver PDF3'),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
+                        : Container(
+                            height: 40,
+                          ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    left: ancho * 0.1,
+                    child: InkWell(
+                      onTap: () => _loadPdf(3),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30),
+                        child: Container(
+                          color: AppTheme.primary,
+                          width: 40,
+                          height: 40,
+                          child: const Icon(
+                            Icons.picture_as_pdf,
+                            size: 30,
+                            color: Color(0xFFf6faf8),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const Divider(
+          height: 10,
+          color: AppTheme.primary,
+        ),
+      ],
+    );
+  }
+
+//--------------------------------------------------------------
+//-------------------------- _selectPicture --------------------
+//--------------------------------------------------------------
+
+  void _selectPicture(int opcion) async {
+    final ImagePicker _picker = ImagePicker();
+
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      if (opcion == 1) {
+        _photoChanged1 = true;
+        _image1 = image;
+      }
+      if (opcion == 2) {
+        _photoChanged2 = true;
+        _image2 = image;
+      }
+      if (opcion == 3) {
+        _photoChanged3 = true;
+        _image3 = image;
+      }
+      setState(() {});
+    }
+  }
+
+//--------------------------------------------------------------
+//-------------------------- _takePicture ----------------------
+//--------------------------------------------------------------
+
+  void _takePicture(int opcion) async {
+    WidgetsFlutterBinding.ensureInitialized();
+    final cameras = await availableCameras();
+    var firstCamera = cameras.first;
+    var response1 = await showAlertDialog(
+        context: context,
+        title: 'Seleccionar cámara',
+        message: '¿Qué cámara desea utilizar?',
+        actions: <AlertDialogAction>[
+          const AlertDialogAction(key: 'no', label: 'Trasera'),
+          const AlertDialogAction(key: 'yes', label: 'Delantera'),
+          const AlertDialogAction(key: 'cancel', label: 'Cancelar'),
+        ]);
+    if (response1 == 'yes') {
+      firstCamera = cameras.first;
+    }
+    if (response1 == 'no') {
+      firstCamera = cameras.last;
+    }
+
+    if (response1 != 'cancel') {
+      Response? response = await Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => SacarFotoScreen(
+                    camera: firstCamera,
+                  )));
+      if (response != null) {
+        if (opcion == 1) {
+          _photoChanged1 = true;
+          _image1 = response.result;
+        }
+        if (opcion == 2) {
+          _photoChanged2 = true;
+          _image2 = response.result;
+        }
+        if (opcion == 3) {
+          _photoChanged3 = true;
+          _image3 = response.result;
+        }
+        setState(() {});
+      }
+    }
+  }
+
+  //-----------------------------------------------------------------
+//-------------------------- _loadPdf -----------------------------
+//-----------------------------------------------------------------
+
+  Future<void> _loadPdf(int option) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowMultiple: false,
+      withData: true,
+      allowedExtensions: ['pdf'],
+    );
+
+    if (result != null) {
+      Uint8List? fileBytes = result.files.first.bytes;
+      String fileName = result.files.first.name;
+      List<int> imageBytesPdf = fileBytes!.buffer.asUint8List();
+      String ruta = result.files.first.path!;
+
+      if (option == 1) {
+        base64imagePdf1 = base64Encode(imageBytesPdf);
+        ruta1 = ruta;
+      }
+
+      if (option == 2) {
+        base64imagePdf2 = base64Encode(imageBytesPdf);
+        ruta2 = ruta;
+      }
+
+      if (option == 3) {
+        base64imagePdf3 = base64Encode(imageBytesPdf);
+        ruta3 = ruta;
+      }
+    }
     setState(() {});
   }
 }
