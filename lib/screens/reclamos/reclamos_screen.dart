@@ -1,3 +1,5 @@
+import 'package:email_validator/email_validator.dart';
+import 'package:epreapp/helpers/helpers.dart';
 import 'package:epreapp/models/models.dart';
 import 'package:epreapp/themes/app_theme.dart';
 import 'package:flutter/gestures.dart';
@@ -94,10 +96,9 @@ class _ReclamosScreenState extends State<ReclamosScreen>
   bool _addressConShowError = false;
   TextEditingController _addressConController = TextEditingController();
 
-  String _localityCon = '';
+  String _localityCon = 'Elija una Localidad...';
   String _localityConError = '';
   bool _localityConShowError = false;
-  TextEditingController _localityConController = TextEditingController();
 
   String _cpCon = '';
   String _cpConError = '';
@@ -116,6 +117,13 @@ class _ReclamosScreenState extends State<ReclamosScreen>
 
   //--------------------- Variables del 4° TabBar --------------------
 
+  bool _erroresEnFacturacion = false;
+  bool _resarcimientoPorDanios = false;
+  bool _suspensionDeSuministro = false;
+  bool _malaAtencionComercial = false;
+  bool _negativaDeConexion = false;
+  bool _inconvenienteDeTension = false;
+  bool _facturaFueraDeTerminoNoRecibidas = false;
   //--------------------- Variables del 5° TabBar --------------------
 
   String _reclamo = '';
@@ -140,285 +148,323 @@ class _ReclamosScreenState extends State<ReclamosScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: Scaffold(
-            backgroundColor: AppTheme.secondary,
-            body: Stack(
-              children: [
-                Column(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.white,
-                              Colors.white,
+    return Container(
+      color: AppTheme.secondary,
+      child: Column(
+        children: [
+          Expanded(
+            child: Scaffold(
+              backgroundColor: AppTheme.secondary,
+              body: Stack(
+                children: [
+                  Column(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.white,
+                                Colors.white,
+                              ],
+                            ),
+                          ),
+                          child: TabBarView(
+                            controller: _tabController,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            dragStartBehavior: DragStartBehavior.start,
+                            children: <Widget>[
+                              //-------------------------------------------------------------------------
+                              //-------------------------- 1° TABBAR ------------------------------------
+                              //-------------------------------------------------------------------------
+
+                              SingleChildScrollView(
+                                child: Column(
+                                  children: <Widget>[
+                                    AppBar(
+                                      title: (const Text("Datos Reclamante")),
+                                      centerTitle: true,
+                                      backgroundColor: AppTheme.primary,
+                                    ),
+                                    Column(
+                                      children: [
+                                        _showFirstName(),
+                                        _showLastName(),
+                                        _showDocument(),
+                                        _showNombrePropio(),
+                                        _nombrePropio
+                                            ? _showFirstNameRep()
+                                            : Container(),
+                                        _nombrePropio
+                                            ? _showLastNameRep()
+                                            : Container(),
+                                        _nombrePropio
+                                            ? _showDocumentRep()
+                                            : Container(),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+
+                              //-------------------------------------------------------------------------
+                              //-------------------------- 2° TABBAR ------------------------------------
+                              //-------------------------------------------------------------------------
+
+                              SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    AppBar(
+                                      title: (const Text("Datos Suministro")),
+                                      centerTitle: true,
+                                      backgroundColor: AppTheme.primary,
+                                    ),
+                                    Column(
+                                      children: [
+                                        _showAddress(),
+                                        _showLocalities(),
+                                        _showCp(),
+                                        const Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 10),
+                                          child: Text(
+                                            "(*) Debe rellenar alguno de estos 2 campos de abajo",
+                                            style: TextStyle(
+                                                color: Colors.red,
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                        _showNis(),
+                                        _showNroCuenta(),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+
+                              //-------------------------------------------------------------------------
+                              //-------------------------- 3° TABBAR ------------------------------------
+                              //-------------------------------------------------------------------------
+
+                              SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    AppBar(
+                                      title: (const Text(
+                                          "Información de Contacto")),
+                                      centerTitle: true,
+                                      backgroundColor: AppTheme.primary,
+                                    ),
+                                    Column(
+                                      children: [
+                                        _showCoincideDireccion(),
+                                        _showAddressCon(),
+                                        _showLocalityCon(),
+                                        _showCpCon(),
+                                        _showTelefonoCon(),
+                                        _showMailCon(),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+
+                              //-------------------------------------------------------------------------
+                              //-------------------------- 4° TABBAR ------------------------------------
+                              //-------------------------------------------------------------------------
+
+                              SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    AppBar(
+                                      title: (const Text("Tipo de Reclamo")),
+                                      centerTitle: true,
+                                      backgroundColor: AppTheme.primary,
+                                    ),
+                                    Column(
+                                      children: [
+                                        const SizedBox(
+                                          height: 15,
+                                        ),
+                                        const Text(
+                                          "(*) Debe marcar al menos una opción",
+                                          style: TextStyle(
+                                              color: Colors.red,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        _showErroresEnFacturacion(),
+                                        _showResarcimientoPorDanios(),
+                                        _showSuspensionDeSuministro(),
+                                        _showMalaAtencionComercial(),
+                                        _showNegativaDeConexion(),
+                                        _showInconvenienteDeTension(),
+                                        _showFacturaFueraDeTerminoNoRecibidas(),
+                                        !_tabBar4Ok
+                                            ? const Text(
+                                                "No ha seleccionado ninguna opción",
+                                                style: TextStyle(
+                                                  color: Colors.red,
+                                                  fontSize: 14,
+                                                ),
+                                              )
+                                            : Container(),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+                              //-------------------------------------------------------------------------
+                              //-------------------------- 5° TABBAR ------------------------------------
+                              //-------------------------------------------------------------------------
+
+                              SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    AppBar(
+                                      title: (const Text("RECLAMO")),
+                                      centerTitle: true,
+                                      backgroundColor: AppTheme.primary,
+                                    ),
+                                    Column(
+                                      children: [
+                                        const SizedBox(
+                                          height: 15,
+                                        ),
+                                        const Text(
+                                          "Describa detalladamente su Reclamo:",
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                        _showReclamo(),
+                                        !_tabBar5Ok
+                                            ? const Text(
+                                                "No ha escrito nada todavía",
+                                                style: TextStyle(
+                                                  color: Colors.red,
+                                                  fontSize: 14,
+                                                ),
+                                              )
+                                            : Container(),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+
+                              //-------------------------------------------------------------------------
+                              //-------------------------- 6° TABBAR ------------------------------------
+                              //-------------------------------------------------------------------------
+
+                              SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    AppBar(
+                                      title: (const Text("Subir Adjuntos")),
+                                      centerTitle: true,
+                                      backgroundColor: AppTheme.primary,
+                                    ),
+                                    Column(
+                                      children: const [],
+                                    )
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                        child: TabBarView(
-                          controller: _tabController,
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          dragStartBehavior: DragStartBehavior.start,
-                          children: <Widget>[
-                            //-------------------------------------------------------------------------
-                            //-------------------------- 1° TABBAR ------------------------------------
-                            //-------------------------------------------------------------------------
-
-                            SingleChildScrollView(
-                              child: Column(
-                                children: <Widget>[
-                                  AppBar(
-                                    title: (const Text("Datos Reclamante")),
-                                    centerTitle: true,
-                                    backgroundColor: AppTheme.primary,
-                                  ),
-                                  Column(
-                                    children: [
-                                      _showFirstName(),
-                                      _showLastName(),
-                                      _showDocument(),
-                                      _showNombrePropio(),
-                                      _nombrePropio
-                                          ? _showFirstNameRep()
-                                          : Container(),
-                                      _nombrePropio
-                                          ? _showLastNameRep()
-                                          : Container(),
-                                      _nombrePropio
-                                          ? _showDocumentRep()
-                                          : Container(),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-
-                            //-------------------------------------------------------------------------
-                            //-------------------------- 2° TABBAR ------------------------------------
-                            //-------------------------------------------------------------------------
-
-                            SingleChildScrollView(
-                              child: Column(
-                                children: [
-                                  AppBar(
-                                    title: (const Text("Datos Suministro")),
-                                    centerTitle: true,
-                                    backgroundColor: AppTheme.primary,
-                                  ),
-                                  Column(
-                                    children: [
-                                      _showAddress(),
-                                      _showLocalities(),
-                                      _showCp(),
-                                      const Text(
-                                        "Debe rellenar alguno de estos 2 campos de abajo",
-                                        style: TextStyle(color: Colors.red),
-                                      ),
-                                      _showNis(),
-                                      _showNroCuenta(),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-
-                            //-------------------------------------------------------------------------
-                            //-------------------------- 3° TABBAR ------------------------------------
-                            //-------------------------------------------------------------------------
-
-                            SingleChildScrollView(
-                              child: Column(
-                                children: [
-                                  AppBar(
-                                    title:
-                                        (const Text("Información de Contacto")),
-                                    centerTitle: true,
-                                    backgroundColor: AppTheme.primary,
-                                  ),
-                                  Column(
-                                    children: [
-                                      _showCoincideDireccion(),
-                                      _showAddressCon(),
-                                      _showLocalityCon(),
-                                      _showCpCon(),
-                                      _showTelefonoCon(),
-                                      _showMailCon(),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-
-                            //-------------------------------------------------------------------------
-                            //-------------------------- 4° TABBAR ------------------------------------
-                            //-------------------------------------------------------------------------
-
-                            SingleChildScrollView(
-                              child: Column(
-                                children: [
-                                  AppBar(
-                                    title: (const Text("Tipo de Reclamo")),
-                                    centerTitle: true,
-                                    backgroundColor: AppTheme.primary,
-                                  ),
-                                  Column(
-                                    children: [
-                                      SizedBox(
-                                        height: 15,
-                                      ),
-                                      const Text(
-                                        "Debe marcar al menos una opción",
-                                        style: TextStyle(color: Colors.red),
-                                      ),
-                                      _showCoincideDireccion(),
-                                      _showCoincideDireccion(),
-                                      _showCoincideDireccion(),
-                                      _showCoincideDireccion(),
-                                      _showCoincideDireccion(),
-                                      _showCoincideDireccion(),
-                                      _showCoincideDireccion(),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-                            //-------------------------------------------------------------------------
-                            //-------------------------- 5° TABBAR ------------------------------------
-                            //-------------------------------------------------------------------------
-
-                            SingleChildScrollView(
-                              child: Column(
-                                children: [
-                                  AppBar(
-                                    title: (const Text("RECLAMO")),
-                                    centerTitle: true,
-                                    backgroundColor: AppTheme.primary,
-                                  ),
-                                  Column(
-                                    children: [
-                                      const Text(
-                                        "Describa detalladamente su Reclamo:",
-                                      ),
-                                      _showReclamo(),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-
-                            //-------------------------------------------------------------------------
-                            //-------------------------- 6° TABBAR ------------------------------------
-                            //-------------------------------------------------------------------------
-
-                            SingleChildScrollView(
-                              child: Column(
-                                children: [
-                                  AppBar(
-                                    title: (const Text("Subir Adjuntos")),
-                                    centerTitle: true,
-                                    backgroundColor: AppTheme.primary,
-                                  ),
-                                  Column(
-                                    children: const [],
-                                  )
-                                ],
-                              ),
-                            ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              bottomNavigationBar: BottomAppBar(
+                elevation: 0,
+                color: AppTheme.primary,
+                child: TabBar(
+                    controller: _tabController,
+                    indicatorColor: Colors.amber,
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    indicatorWeight: 5,
+                    labelColor: Colors.amber,
+                    unselectedLabelColor: Colors.grey,
+                    labelPadding: const EdgeInsets.all(10),
+                    tabs: <Widget>[
+                      Tab(
+                        child: Column(
+                          children: [
+                            _tabBar1Ok
+                                ? const Icon(Icons.done_outline)
+                                : const Icon(Icons.looks_one),
                           ],
                         ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            bottomNavigationBar: BottomAppBar(
-              elevation: 0,
-              color: AppTheme.primary,
-              child: TabBar(
-                  controller: _tabController,
-                  indicatorColor: Colors.amber,
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  indicatorWeight: 5,
-                  labelColor: Colors.amber,
-                  unselectedLabelColor: Colors.grey,
-                  labelPadding: const EdgeInsets.all(10),
-                  tabs: <Widget>[
-                    Tab(
-                      child: Column(
-                        children: [
-                          _tabBar1Ok
-                              ? const Icon(Icons.done_outline)
-                              : const Icon(Icons.looks_one),
-                        ],
+                      Tab(
+                        child: Column(
+                          children: [
+                            _tabBar2Ok
+                                ? const Icon(Icons.done_outline)
+                                : const Icon(Icons.looks_two),
+                          ],
+                        ),
                       ),
-                    ),
-                    Tab(
-                      child: Column(
-                        children: [
-                          _tabBar2Ok
-                              ? const Icon(Icons.done_outline)
-                              : const Icon(Icons.looks_two),
-                        ],
+                      Tab(
+                        child: Column(
+                          children: [
+                            _tabBar3Ok
+                                ? const Icon(Icons.done_outline)
+                                : const Icon(Icons.looks_3),
+                          ],
+                        ),
                       ),
-                    ),
-                    Tab(
-                      child: Column(
-                        children: [
-                          _tabBar3Ok
-                              ? const Icon(Icons.done_outline)
-                              : const Icon(Icons.looks_3),
-                        ],
+                      Tab(
+                        child: Column(
+                          children: [
+                            _tabBar4Ok
+                                ? const Icon(Icons.done_outline)
+                                : const Icon(Icons.looks_4),
+                          ],
+                        ),
                       ),
-                    ),
-                    Tab(
-                      child: Column(
-                        children: [
-                          _tabBar4Ok
-                              ? const Icon(Icons.done_outline)
-                              : const Icon(Icons.looks_4),
-                        ],
+                      Tab(
+                        child: Column(
+                          children: [
+                            _tabBar5Ok
+                                ? const Icon(Icons.done_outline)
+                                : const Icon(Icons.looks_5),
+                          ],
+                        ),
                       ),
-                    ),
-                    Tab(
-                      child: Column(
-                        children: [
-                          _tabBar5Ok
-                              ? const Icon(Icons.done_outline)
-                              : const Icon(Icons.looks_5),
-                        ],
+                      Tab(
+                        child: Column(
+                          children: [
+                            _tabBar6Ok
+                                ? const Icon(Icons.done_outline)
+                                : const Icon(Icons.looks_6),
+                          ],
+                        ),
                       ),
-                    ),
-                    Tab(
-                      child: Column(
-                        children: [
-                          _tabBar6Ok
-                              ? const Icon(Icons.done_outline)
-                              : const Icon(Icons.looks_6),
-                        ],
-                      ),
-                    ),
-                  ]),
+                    ]),
+              ),
             ),
           ),
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        _showButtons(),
-        const SizedBox(
-          height: 10,
-        ),
-      ],
+          const SizedBox(
+            height: 10,
+          ),
+          _showButtons(),
+          const SizedBox(
+            height: 10,
+          ),
+        ],
+      ),
     );
   }
 
@@ -447,7 +493,7 @@ class _ReclamosScreenState extends State<ReclamosScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
-                  Icon(Icons.login),
+                  Icon(Icons.done_outline),
                   SizedBox(
                     width: 20,
                   ),
@@ -468,11 +514,18 @@ class _ReclamosScreenState extends State<ReclamosScreen>
                   borderRadius: BorderRadius.circular(5),
                 ),
               ),
-              onPressed: () => _eviarReclamo(),
+              onPressed: (_tabBar1Ok &&
+                      _tabBar2Ok &&
+                      _tabBar3Ok &&
+                      _tabBar4Ok &&
+                      _tabBar5Ok &&
+                      _tabBar6Ok)
+                  ? () => _enviarReclamo()
+                  : null,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
-                  Icon(Icons.login),
+                  Icon(Icons.send),
                   SizedBox(
                     width: 20,
                   ),
@@ -487,10 +540,10 @@ class _ReclamosScreenState extends State<ReclamosScreen>
   }
 
 //-----------------------------------------------------------------
-//--------------------- _eviarReclamo -----------------------------
+//--------------------- _enviarReclamo ----------------------------
 //-----------------------------------------------------------------
 
-  void _eviarReclamo() async {}
+  void _enviarReclamo() async {}
 
 //--------------------------------------------------------------
 //-------------------------- _showFirstName --------------------
@@ -508,6 +561,8 @@ class _ReclamosScreenState extends State<ReclamosScreen>
             labelText: 'Nombre',
             errorText: _firstnameShowError ? _firstnameError : null,
             suffixIcon: const Icon(Icons.person),
+            icon: const Icon(Icons.emergency),
+            iconColor: Colors.red,
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
         onChanged: (value) {
@@ -533,6 +588,8 @@ class _ReclamosScreenState extends State<ReclamosScreen>
             labelText: 'Apellido',
             errorText: _lastnameShowError ? _lastnameError : null,
             suffixIcon: const Icon(Icons.person),
+            icon: const Icon(Icons.emergency),
+            iconColor: Colors.red,
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
         onChanged: (value) {
@@ -550,7 +607,8 @@ class _ReclamosScreenState extends State<ReclamosScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       child: TextField(
-        controller: _firstnameController,
+        controller: _documentController,
+        keyboardType: TextInputType.number,
         decoration: InputDecoration(
             fillColor: _document == "" ? Colors.yellow[200] : Colors.white,
             filled: true,
@@ -558,6 +616,8 @@ class _ReclamosScreenState extends State<ReclamosScreen>
             labelText: 'DNI',
             errorText: _documentShowError ? _documentError : null,
             suffixIcon: const Icon(Icons.assignment_ind),
+            icon: const Icon(Icons.emergency),
+            iconColor: Colors.red,
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
         onChanged: (value) {
@@ -647,7 +707,8 @@ class _ReclamosScreenState extends State<ReclamosScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       child: TextField(
-        controller: _firstnameRepController,
+        controller: _documentRepController,
+        keyboardType: TextInputType.number,
         decoration: InputDecoration(
             fillColor: Colors.white,
             filled: true,
@@ -680,6 +741,8 @@ class _ReclamosScreenState extends State<ReclamosScreen>
             labelText: 'Dirección',
             errorText: _addressShowError ? _addressError : null,
             suffixIcon: const Icon(Icons.home),
+            icon: const Icon(Icons.emergency),
+            iconColor: Colors.red,
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
         onChanged: (value) {
@@ -707,6 +770,8 @@ class _ReclamosScreenState extends State<ReclamosScreen>
                 filled: true,
                 hintText: 'Elija una Localidad...',
                 labelText: 'Localidad...',
+                icon: const Icon(Icons.emergency),
+                iconColor: Colors.red,
                 errorText: _localityShowError ? _localityError : null,
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -731,30 +796,13 @@ class _ReclamosScreenState extends State<ReclamosScreen>
       child: Text('Elija una Localidad...'),
     ));
 
-    list.add(const DropdownMenuItem(
-      value: 'Aguada Guzman',
-      child: Text('Aguada Guzman'),
-    ));
-
-    list.add(const DropdownMenuItem(
-      value: 'Arroyo de la Ventana',
-      child: Text('Arroyo de la Ventana'),
-    ));
-
-    list.add(const DropdownMenuItem(
-      value: 'Arroyo los Berros',
-      child: Text('Arroyo los Berros'),
-    ));
-
-    list.add(const DropdownMenuItem(
-      value: 'Balneario El Condor',
-      child: Text('Balneario El Condor'),
-    ));
-
-    list.add(const DropdownMenuItem(
-      value: 'Balneario Los Salados',
-      child: Text('Balneario Los Salados'),
-    ));
+    for (var city in Constants.cities) {
+      list.add(DropdownMenuItem(
+        value: city,
+        child: Text(city),
+      ));
+    }
+    setState(() {});
 
     return list;
   }
@@ -848,6 +896,20 @@ class _ReclamosScreenState extends State<ReclamosScreen>
       value: _coincideDireccion,
       activeColor: AppTheme.primary,
       onChanged: (value) {
+        if (value == true) {
+          _addressCon = _address;
+          _addressConController.text = _addressCon;
+          _localityCon = _locality;
+          _cpCon = _cp;
+          _cpConController.text = _cpCon;
+        } else {
+          _addressCon = "";
+          _addressConController.text = _addressCon;
+          _localityCon = "Elija una Localidad...";
+          _cpCon = "";
+          _cpConController.text = _cpCon;
+        }
+
         setState(() {
           _coincideDireccion = value!;
         });
@@ -871,6 +933,8 @@ class _ReclamosScreenState extends State<ReclamosScreen>
             labelText: 'Dirección',
             errorText: _addressConShowError ? _addressConError : null,
             suffixIcon: const Icon(Icons.home),
+            icon: const Icon(Icons.emergency),
+            iconColor: Colors.red,
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
         onChanged: (value) {
@@ -886,22 +950,29 @@ class _ReclamosScreenState extends State<ReclamosScreen>
 
   Widget _showLocalityCon() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      child: TextField(
-        controller: _localityConController,
-        decoration: InputDecoration(
-            fillColor: _localityCon == "" ? Colors.yellow[200] : Colors.white,
-            filled: true,
-            hintText: 'Seleccione una Localidad...',
-            labelText: 'Localidad',
-            errorText: _localityConShowError ? _localityConError : null,
-            suffixIcon: const Icon(Icons.person_pin_circle),
-            border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
-        onChanged: (value) {
-          _localityCon = value;
-        },
-      ),
+      padding: const EdgeInsets.all(10),
+      child: _localities.isEmpty
+          ? const Text('Cargando localidades...')
+          : DropdownButtonFormField(
+              value: _localityCon,
+              decoration: InputDecoration(
+                fillColor: _localityCon == 'Elija una Localidad...'
+                    ? Colors.yellow[200]
+                    : Colors.white,
+                filled: true,
+                hintText: 'Elija una Localidad...',
+                labelText: 'Localidad...',
+                icon: const Icon(Icons.emergency),
+                iconColor: Colors.red,
+                errorText: _localityConShowError ? _localityConError : null,
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              items: _getComboLocalities(),
+              onChanged: (value) {
+                _localityCon = value.toString();
+              },
+            ),
     );
   }
 
@@ -915,12 +986,14 @@ class _ReclamosScreenState extends State<ReclamosScreen>
       child: TextField(
         controller: _cpConController,
         decoration: InputDecoration(
-            fillColor: _cp == "" ? Colors.yellow[200] : Colors.white,
+            fillColor: _cpCon == "" ? Colors.yellow[200] : Colors.white,
             filled: true,
             hintText: 'Código Postal...',
             labelText: 'Código Postal',
             errorText: _cpConShowError ? _cpConError : null,
             suffixIcon: const Icon(Icons.contact_mail),
+            icon: const Icon(Icons.emergency),
+            iconColor: Colors.red,
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
         onChanged: (value) {
@@ -940,12 +1013,14 @@ class _ReclamosScreenState extends State<ReclamosScreen>
       child: TextField(
         controller: _telefonoConController,
         decoration: InputDecoration(
-            fillColor: _cp == "" ? Colors.yellow[200] : Colors.white,
+            fillColor: _telefonoCon == "" ? Colors.yellow[200] : Colors.white,
             filled: true,
             hintText: 'Ingrese su Teléfono...',
             labelText: 'Teléfono',
             errorText: _telefonoConShowError ? _telefonoConError : null,
             suffixIcon: const Icon(Icons.phone),
+            icon: const Icon(Icons.emergency),
+            iconColor: Colors.red,
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
         onChanged: (value) {
@@ -964,13 +1039,16 @@ class _ReclamosScreenState extends State<ReclamosScreen>
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       child: TextField(
         controller: _mailConController,
+        keyboardType: TextInputType.emailAddress,
         decoration: InputDecoration(
-            fillColor: _cp == "" ? Colors.yellow[200] : Colors.white,
+            fillColor: _mailCon == "" ? Colors.yellow[200] : Colors.white,
             filled: true,
             hintText: 'Ingrese su Correo Electrónico...',
             labelText: 'Correo Electrónico',
             errorText: _mailConShowError ? _mailConError : null,
             suffixIcon: const Icon(Icons.alternate_email),
+            icon: const Icon(Icons.emergency),
+            iconColor: Colors.red,
             border:
                 OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
         onChanged: (value) {
@@ -980,15 +1058,167 @@ class _ReclamosScreenState extends State<ReclamosScreen>
     );
   }
 
+//--------------------------------------------------------------
+//------------------ _showErroresEnFacturacion -----------------
+//--------------------------------------------------------------
+  _showErroresEnFacturacion() {
+    return CheckboxListTile(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text('Errores en Facturación:'),
+        ],
+      ),
+      value: _erroresEnFacturacion,
+      activeColor: AppTheme.primary,
+      onChanged: (value) {
+        setState(() {
+          _erroresEnFacturacion = value!;
+        });
+      },
+    );
+  }
+
+//--------------------------------------------------------------
+//------------------ _showResarcimientoPorDanios ---------------
+//--------------------------------------------------------------
+  _showResarcimientoPorDanios() {
+    return CheckboxListTile(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text('Resarcimiento por Daños:'),
+        ],
+      ),
+      value: _resarcimientoPorDanios,
+      activeColor: AppTheme.primary,
+      onChanged: (value) {
+        setState(() {
+          _resarcimientoPorDanios = value!;
+        });
+      },
+    );
+  }
+
+//--------------------------------------------------------------
+//------------------ _showSuspensionDeSuministro ---------------
+//--------------------------------------------------------------
+  _showSuspensionDeSuministro() {
+    return CheckboxListTile(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text('Suspensión de Suministro:'),
+        ],
+      ),
+      value: _suspensionDeSuministro,
+      activeColor: AppTheme.primary,
+      onChanged: (value) {
+        setState(() {
+          _suspensionDeSuministro = value!;
+        });
+      },
+    );
+  }
+
+//--------------------------------------------------------------
+//------------------ _showMalaAtencionComercial ----------------
+//--------------------------------------------------------------
+  _showMalaAtencionComercial() {
+    return CheckboxListTile(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text('Mala atención comercial:'),
+        ],
+      ),
+      value: _malaAtencionComercial,
+      activeColor: AppTheme.primary,
+      onChanged: (value) {
+        setState(() {
+          _malaAtencionComercial = value!;
+        });
+      },
+    );
+  }
+
+//--------------------------------------------------------------
+//------------------ _showNegativaDeConexion -------------------
+//--------------------------------------------------------------
+  _showNegativaDeConexion() {
+    return CheckboxListTile(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text('Negativa de Conexión:'),
+        ],
+      ),
+      value: _negativaDeConexion,
+      activeColor: AppTheme.primary,
+      onChanged: (value) {
+        setState(() {
+          _negativaDeConexion = value!;
+        });
+      },
+    );
+  }
+
+//--------------------------------------------------------------
+//------------------ _showInconvenienteDeTension ---------------
+//--------------------------------------------------------------
+  _showInconvenienteDeTension() {
+    return CheckboxListTile(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text('Inconveniente de Tensión:'),
+        ],
+      ),
+      value: _inconvenienteDeTension,
+      activeColor: AppTheme.primary,
+      onChanged: (value) {
+        setState(() {
+          _inconvenienteDeTension = value!;
+        });
+      },
+    );
+  }
+
+//--------------------------------------------------------------
+//------------------ _showFacturaFueraDeTerminoNoRecibidas -----
+//--------------------------------------------------------------
+  _showFacturaFueraDeTerminoNoRecibidas() {
+    return CheckboxListTile(
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text('Factura Fuera de Término / no recibidas:'),
+        ],
+      ),
+      value: _facturaFueraDeTerminoNoRecibidas,
+      activeColor: AppTheme.primary,
+      onChanged: (value) {
+        setState(() {
+          _facturaFueraDeTerminoNoRecibidas = value!;
+        });
+      },
+    );
+  }
+
 //-----------------------------------------------------------------
 //--------------------- _showReclamo ------------------------------
 //-----------------------------------------------------------------
 
   Widget _showReclamo() {
+    double alto = MediaQuery.of(context).size.height;
     return Container(
+      height: alto * .6,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       child: TextField(
         controller: _reclamoController,
+        keyboardType: TextInputType.multiline,
+        maxLines: null,
+        expands: true,
         decoration: InputDecoration(
             fillColor: Colors.white,
             filled: true,
@@ -1011,6 +1241,7 @@ class _ReclamosScreenState extends State<ReclamosScreen>
 
   void _loadData() async {
     await _getLocalities();
+    await _showMessage();
   }
 
 //-----------------------------------------------------------------
@@ -1018,30 +1249,199 @@ class _ReclamosScreenState extends State<ReclamosScreen>
 //-----------------------------------------------------------------
 
   Future<void> _getLocalities() async {
-    _localities = [
+    _localities.add(
       Locality(locality: 'Elija una Localidad...'),
-      Locality(locality: 'Aguada Guzman'),
-      Locality(locality: 'Arroyo de la Ventana'),
-      Locality(locality: 'Arroyo los Berros'),
-      Locality(locality: 'Balneario El Condor'),
-      Locality(locality: 'Balneario Los Salados'),
-    ];
+    );
 
+    for (var city in Constants.cities) {
+      _localities.add(
+        Locality(locality: city),
+      );
+    }
     setState(() {});
   }
 
-  //-----------------------------------------------------------------
-//--------------------- _loadData ---------------------------------
+//---------------------------------------------------------------
+//----------------------- _showMessage -----------------------------
+//---------------------------------------------------------------
+
+  Future<void> _showMessage() async {
+    await showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            title: const Text(''),
+            content: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Image.asset(
+                    "assets/logoverde.png",
+                    height: 120,
+                    width: 500,
+                  ),
+                  const Text('¡Bienvenido!'),
+                  const Text('Por favor lea atentamente'),
+                  const Text('los campos antes de completar'),
+                  const Text('el Formulario.'),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  const Text('Los campos con (*) son',
+                      style: TextStyle(color: Colors.red)),
+                  const Text('OBLIGATORIOS',
+                      style: TextStyle(color: Colors.red)),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                ]),
+            actions: <Widget>[
+              TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 50, vertical: 10),
+                      color: Colors.purple,
+                      child: const Text('Entendido',
+                          style: TextStyle(color: Colors.white)))),
+            ],
+          );
+        });
+  }
+
+//-----------------------------------------------------------------
+//--------------------- _validarTabBars ---------------------------
 //-----------------------------------------------------------------
 
   void _validarTabBars() {
+    bool isValid = true;
+
+    //------------------ 1° TabBar ---------------------------
+
+    if (_firstname == "") {
+      isValid = false;
+      _firstnameShowError = true;
+      _firstnameError = 'Ingrese un Nombre';
+    } else {
+      _firstnameShowError = false;
+    }
+
+    if (_lastname == "") {
+      isValid = false;
+      _lastnameShowError = true;
+      _lastnameError = 'Ingrese un Apellido';
+    } else {
+      _lastnameShowError = false;
+    }
+
+    if (_document == "") {
+      isValid = false;
+      _documentShowError = true;
+      _documentError = 'Ingrese un Documento';
+    } else {
+      _documentShowError = false;
+    }
+
     _tabBar1Ok =
-        _firstname.isNotEmpty && _lastname.isEmpty && _document.isNotEmpty;
+        _firstname.isNotEmpty && _lastname.isNotEmpty && _document.isNotEmpty;
+
+//------------------ 2° TabBar ---------------------------
+
+    if (_address == "") {
+      isValid = false;
+      _addressShowError = true;
+      _addressError = 'Ingrese una Dirección';
+    } else {
+      _addressShowError = false;
+    }
+
+    if (_locality == 'Elija una Localidad...') {
+      isValid = false;
+      _localityShowError = true;
+      _localityError = 'Debe elegir una Localidad';
+    } else {
+      _localityShowError = false;
+    }
+
+    if (_cp == "") {
+      isValid = false;
+      _cpShowError = true;
+      _cpError = 'Ingrese un Código Postal';
+    } else {
+      _cpShowError = false;
+    }
+
+    if ((_nis == "") && (_nroCuenta == "")) {
+      isValid = false;
+      _nisShowError = true;
+      _nisError = 'Ingrese un N° de NIS o un N° de Cuenta';
+      _nroCuentaShowError = true;
+      _nroCuentaError = 'Ingrese un N° de NIS o un N° de Cuenta';
+    } else {
+      _nisShowError = false;
+      _nroCuentaShowError = false;
+    }
 
     _tabBar2Ok = _address.isNotEmpty &&
         _locality != 'Elija una Localidad...' &&
         _cp.isNotEmpty &&
         (_nis.isNotEmpty || _nroCuenta.isNotEmpty);
+
+//------------------ 3° TabBar ---------------------------
+
+    if (_addressCon == "") {
+      isValid = false;
+      _addressConShowError = true;
+      _addressConError = 'Ingrese una Dirección';
+    } else {
+      _addressConShowError = false;
+    }
+
+    if (_localityCon == 'Elija una Localidad...') {
+      isValid = false;
+      _localityConShowError = true;
+      _localityConError = 'Debe elegir una Localidad';
+    } else {
+      _localityConShowError = false;
+    }
+
+    if (_cpCon == "") {
+      isValid = false;
+      _cpConShowError = true;
+      _cpConError = 'Ingrese un Código Postal';
+    } else {
+      _cpConShowError = false;
+    }
+
+    if (_telefonoCon == "") {
+      isValid = false;
+      _telefonoConShowError = true;
+      _telefonoConError = 'Ingrese un Teléfono';
+    } else {
+      _telefonoConShowError = false;
+    }
+
+    if (_mailCon == "") {
+      isValid = false;
+      _mailConShowError = true;
+      _mailConError = 'Ingrese un Correo Electrónico';
+    } else {
+      _mailConShowError = false;
+    }
+
+    if (_mailCon != "") {
+      if (!EmailValidator.validate(_mailCon)) {
+        isValid = false;
+        _mailConShowError = true;
+        _mailConError = 'Formato de Correo Electrónico no válido';
+      } else {
+        _mailConShowError = false;
+      }
+    }
 
     _tabBar3Ok = _addressCon.isNotEmpty &&
         _localityCon != 'Elija una Localidad...' &&
@@ -1049,10 +1449,21 @@ class _ReclamosScreenState extends State<ReclamosScreen>
         _telefonoCon.isNotEmpty &&
         _mailCon.isNotEmpty;
 
-    _tabBar4Ok = true;
+//------------------ 4° TabBar ---------------------------
+
+    _tabBar4Ok = _erroresEnFacturacion ||
+        _resarcimientoPorDanios ||
+        _suspensionDeSuministro ||
+        _malaAtencionComercial ||
+        _negativaDeConexion ||
+        _inconvenienteDeTension ||
+        _facturaFueraDeTerminoNoRecibidas;
+
+//------------------ 5° TabBar ---------------------------
 
     _tabBar5Ok = _reclamo.isNotEmpty;
 
+//------------------ 6° TabBar ---------------------------
     _tabBar6Ok = true;
 
     setState(() {});
