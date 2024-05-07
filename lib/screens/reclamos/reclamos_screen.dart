@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:epreapp/components/loader_component.dart';
 import 'package:epreapp/helpers/helpers.dart';
 import 'package:epreapp/models/models.dart';
 import 'package:epreapp/screens/screens.dart';
@@ -35,6 +37,8 @@ class _ReclamosScreenState extends State<ReclamosScreen>
   bool _tabBar4Ok = false;
   bool _tabBar5Ok = false;
   bool _tabBar6Ok = false;
+
+  bool _showLoader = false;
 
   //--------------------- Variables del 1° TabBar --------------------
   String _firstname = '';
@@ -414,6 +418,11 @@ class _ReclamosScreenState extends State<ReclamosScreen>
                       ),
                     ],
                   ),
+                  Center(
+                    child: _showLoader
+                        ? const LoaderComponent(text: 'Guardando...')
+                        : Container(),
+                  ),
                 ],
               ),
               bottomNavigationBar: BottomAppBar(
@@ -573,7 +582,106 @@ class _ReclamosScreenState extends State<ReclamosScreen>
 //--------------------- _enviarReclamo ----------------------------
 //-----------------------------------------------------------------
 
-  void _enviarReclamo() async {}
+  void _enviarReclamo() async {
+    setState(() {
+      _showLoader = true;
+    });
+
+    String base64image1 = '';
+    String base64image2 = '';
+    String base64image3 = '';
+
+    if (_photoChanged1) {
+      List<int> imageBytes1 = await _image1.readAsBytes();
+      base64image1 = base64Encode(imageBytes1);
+    }
+
+    if (_photoChanged2) {
+      List<int> imageBytes2 = await _image2.readAsBytes();
+      base64image2 = base64Encode(imageBytes2);
+    }
+    if (_photoChanged3) {
+      List<int> imageBytes3 = await _image3.readAsBytes();
+      base64image3 = base64Encode(imageBytes3);
+    }
+
+    var connectivityResult = await Connectivity().checkConnectivity();
+
+    if (connectivityResult == ConnectivityResult.none) {
+      setState(() {
+        _showLoader = false;
+      });
+      await showAlertDialog(
+          context: context,
+          title: 'Error',
+          message: 'Verifica que estés conectado a Internet',
+          actions: <AlertDialogAction>[
+            const AlertDialogAction(key: null, label: 'Aceptar'),
+          ]);
+      return;
+    }
+
+    Map<String, dynamic> request = {
+      'Nombre': _firstname,
+      'Apellido': _lastname,
+      'DNI': _document,
+      'NombrePropio': _nombrePropio ? 1 : 0,
+      'NombreRepresentante': _firstnameRep,
+      'ApellidoRepresentante': _lastnameRep,
+      'DNIRepresentante': _documentRep,
+      'Direccion': _address,
+      'Localidad': _locality,
+      'CodPostal': _cp,
+      'Nis': _nis,
+      'NroCuenta': _nroCuenta,
+      'CoincideDireccion': _coincideDireccion ? 1 : 0,
+      'DireccionContacto': _addressCon,
+      'LocalidadContacto': _localityCon,
+      'CodPostalContacto': _cpCon,
+      'Telefono': _telefonoCon,
+      'Correo': _mailCon,
+      'ErroresEnFacturacion': _erroresEnFacturacion ? 1 : 0,
+      'ResarcimientoPorDanios': _resarcimientoPorDanios ? 1 : 0,
+      'SuspensionDeSuministro': _suspensionDeSuministro ? 1 : 0,
+      'MalaAtencionComercial': _malaAtencionComercial ? 1 : 0,
+      'NegativaDeConexion': _negativaDeConexion ? 1 : 0,
+      'InconvenienteDeTension': _inconvenienteDeTension ? 1 : 0,
+      'FacturaFueraDeTerminoNoRecibidas':
+          _facturaFueraDeTerminoNoRecibidas ? 1 : 0,
+      'Reclamo': _reclamo,
+      'ArrayFoto1': base64image1,
+      'ArrayFoto2': base64image2,
+      'ArrayFoto3': base64image3,
+      'ArrayPdf1': base64imagePdf1,
+      'ArrayPdf2': base64imagePdf2,
+      'ArrayPdf3': base64imagePdf3,
+    };
+
+    Response response = await ApiHelper.postNoToken(
+        '/api/AppReclamos/PostAppReclamos', request);
+    if (!response.isSuccess) {
+      await showAlertDialog(
+          context: context,
+          title: 'Error',
+          message: response.message,
+          actions: <AlertDialogAction>[
+            const AlertDialogAction(key: null, label: 'Aceptar'),
+          ]);
+      return;
+    }
+
+    setState(() {
+      _showLoader = false;
+    });
+    await showAlertDialog(
+        context: context,
+        title: 'Aviso',
+        message: 'Reclamo enviado con éxito!',
+        actions: <AlertDialogAction>[
+          const AlertDialogAction(key: null, label: 'Aceptar'),
+        ]);
+    Navigator.pop(context, 'yes');
+  }
 
 //--------------------------------------------------------------
 //-------------------------- _showFirstName --------------------

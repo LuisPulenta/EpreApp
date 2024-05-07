@@ -1,10 +1,8 @@
 import 'package:epreapp/themes/app_theme.dart';
 import 'package:epreapp/widgets/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:epreapp/models/models.dart';
 import 'package:epreapp/screens/screens.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);

@@ -1,3 +1,4 @@
+import 'package:epreapp/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 
@@ -12,7 +13,7 @@ class PdfScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Visualización PDF'),
         centerTitle: true,
-        backgroundColor: const Color(0xff282886),
+        backgroundColor: AppTheme.primary,
       ),
       body: Center(
         child: PDFView(
