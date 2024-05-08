@@ -1468,10 +1468,26 @@ class _ReclamosScreenState extends State<ReclamosScreen>
       _firstnameShowError = false;
     }
 
+    if (_firstname.length > 30) {
+      isValid = false;
+      _firstnameShowError = true;
+      _firstnameError = 'Máximo 30 caracteres. Ha escrito ${_firstname.length}';
+    } else {
+      _firstnameShowError = false;
+    }
+
     if (_lastname == "") {
       isValid = false;
       _lastnameShowError = true;
       _lastnameError = 'Ingrese un Apellido';
+    } else {
+      _lastnameShowError = false;
+    }
+
+    if (_lastname.length > 30) {
+      isValid = false;
+      _lastnameShowError = true;
+      _lastnameError = 'Máximo 30 caracteres. Ha escrito ${_lastname.length}';
     } else {
       _lastnameShowError = false;
     }
@@ -1484,6 +1500,41 @@ class _ReclamosScreenState extends State<ReclamosScreen>
       _documentShowError = false;
     }
 
+    if (_document.length > 10) {
+      isValid = false;
+      _documentShowError = true;
+      _documentError = 'Máximo 10 caracteres. Ha escrito ${_document.length}';
+    } else {
+      _documentShowError = false;
+    }
+
+    if (_firstnameRep.length > 30) {
+      isValid = false;
+      _firstnameRepShowError = true;
+      _firstnameRepError =
+          'Máximo 30 caracteres. Ha escrito ${_firstnameRep.length}';
+    } else {
+      _firstnameRepShowError = false;
+    }
+
+    if (_lastnameRep.length > 30) {
+      isValid = false;
+      _lastnameRepShowError = true;
+      _lastnameRepError =
+          'Máximo 30 caracteres. Ha escrito ${_lastnameRep.length}';
+    } else {
+      _lastnameRepShowError = false;
+    }
+
+    if (_documentRep.length > 10) {
+      isValid = false;
+      _documentRepShowError = true;
+      _documentRepError =
+          'Máximo 10 caracteres. Ha escrito ${_documentRep.length}';
+    } else {
+      _documentRepShowError = false;
+    }
+
     _tabBar1Ok =
         _firstname.isNotEmpty && _lastname.isNotEmpty && _document.isNotEmpty;
 
@@ -1493,6 +1544,14 @@ class _ReclamosScreenState extends State<ReclamosScreen>
       isValid = false;
       _addressShowError = true;
       _addressError = 'Ingrese una Dirección';
+    } else {
+      _addressShowError = false;
+    }
+
+    if (_address.length > 50) {
+      isValid = false;
+      _addressShowError = true;
+      _addressError = 'Máximo 50 caracteres. Ha escrito ${_address.length}';
     } else {
       _addressShowError = false;
     }
@@ -1513,6 +1572,14 @@ class _ReclamosScreenState extends State<ReclamosScreen>
       _cpShowError = false;
     }
 
+    if (_cp.length > 6) {
+      isValid = false;
+      _cpShowError = true;
+      _cpError = 'Máximo 6 caracteres. Ha escrito ${_cp.length}';
+    } else {
+      _cpShowError = false;
+    }
+
     if ((_nis == "") && (_nroCuenta == "")) {
       isValid = false;
       _nisShowError = true;
@@ -1521,6 +1588,22 @@ class _ReclamosScreenState extends State<ReclamosScreen>
       _nroCuentaError = 'Ingrese un N° de NIS o un N° de Cuenta';
     } else {
       _nisShowError = false;
+      _nroCuentaShowError = false;
+    }
+
+    if (_nis.length > 12) {
+      isValid = false;
+      _nisShowError = true;
+      _nisError = 'Máximo 12 caracteres. Ha escrito ${_nis.length}';
+    } else {
+      _nisShowError = false;
+    }
+
+    if (_nroCuenta.length > 12) {
+      isValid = false;
+      _nroCuentaShowError = true;
+      _nroCuentaError = 'Máximo 12 caracteres. Ha escrito ${_nroCuenta.length}';
+    } else {
       _nroCuentaShowError = false;
     }
 
@@ -1535,6 +1618,15 @@ class _ReclamosScreenState extends State<ReclamosScreen>
       isValid = false;
       _addressConShowError = true;
       _addressConError = 'Ingrese una Dirección';
+    } else {
+      _addressConShowError = false;
+    }
+
+    if (_addressCon.length > 50) {
+      isValid = false;
+      _addressConShowError = true;
+      _addressConError =
+          'Máximo 50 caracteres. Ha escrito ${_addressCon.length}';
     } else {
       _addressConShowError = false;
     }
@@ -1555,10 +1647,27 @@ class _ReclamosScreenState extends State<ReclamosScreen>
       _cpConShowError = false;
     }
 
+    if (_cpCon.length > 6) {
+      isValid = false;
+      _cpConShowError = true;
+      _cpConError = 'Máximo 6 caracteres. Ha escrito ${_cpCon.length}';
+    } else {
+      _cpConShowError = false;
+    }
+
     if (_telefonoCon == "") {
       isValid = false;
       _telefonoConShowError = true;
       _telefonoConError = 'Ingrese un Teléfono';
+    } else {
+      _telefonoConShowError = false;
+    }
+
+    if (_telefonoCon.length > 20) {
+      isValid = false;
+      _telefonoConShowError = true;
+      _telefonoConError =
+          'Máximo 20 caracteres. Ha escrito ${_telefonoCon.length}';
     } else {
       _telefonoConShowError = false;
     }
@@ -1572,12 +1681,18 @@ class _ReclamosScreenState extends State<ReclamosScreen>
     }
 
     if (_mailCon != "") {
-      if (!EmailValidator.validate(_mailCon)) {
+      if (_mailCon.length > 30) {
         isValid = false;
         _mailConShowError = true;
-        _mailConError = 'Formato de Correo Electrónico no válido';
+        _mailConError = 'Máximo 30 caracteres. Ha escrito ${_mailCon.length}';
       } else {
-        _mailConShowError = false;
+        if (!EmailValidator.validate(_mailCon)) {
+          isValid = false;
+          _mailConShowError = true;
+          _mailConError = 'Formato de Correo Electrónico no válido';
+        } else {
+          _mailConShowError = false;
+        }
       }
     }
 
@@ -1600,6 +1715,14 @@ class _ReclamosScreenState extends State<ReclamosScreen>
 //------------------ 5° TabBar ---------------------------
 
     _tabBar5Ok = _reclamo.isNotEmpty;
+
+    if (_reclamo.length > 300) {
+      isValid = false;
+      _reclamoShowError = true;
+      _reclamoError = 'Máximo 300 caracteres. Ha escrito ${_reclamo.length}';
+    } else {
+      _reclamoShowError = false;
+    }
 
 //------------------ 6° TabBar ---------------------------
     _tabBar6Ok = true;
