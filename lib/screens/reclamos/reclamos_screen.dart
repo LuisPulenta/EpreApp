@@ -676,7 +676,8 @@ class _ReclamosScreenState extends State<ReclamosScreen>
     await showAlertDialog(
         context: context,
         title: 'Aviso',
-        message: 'Reclamo enviado con éxito!',
+        message:
+            'Reclamo enviado con éxito! N°: xx. Pronto nos comunicaremos con vos. Gracias. ',
         actions: <AlertDialogAction>[
           const AlertDialogAction(key: null, label: 'Aceptar'),
         ]);
